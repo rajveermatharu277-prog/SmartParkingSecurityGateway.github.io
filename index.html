@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B132B">
+<title>Smart Parking Security Gateway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#070D1F;
+  --bg-app:#0B132B;
+  --card:#0F172E;
+  --card-elev:#141E38;
+  --card-input:#182449;
+  --card-hover:#1C2541;
+  --border:#1e293b;
+  --border-soft:rgba(51,65,85,.7);
+  --ink:#f1f5f9;
+  --ink-dim:#94a3b8;
+  --ink-mute:#64748b;
+  --cyan:#22d3ee;
+  --cyan-strong:#06b6d4;
+  --blue:#2563eb;
+  --ok:#34d399;
+  --ok-bg:rgba(16,185,129,.12);
+  --ok-bd:rgba(16,185,129,.35);
+  --bad:#fb7185;
+  --bad-bg:rgba(244,63,94,.12);
+  --bad-bd:rgba(244,63,94,.35);
+  --warn:#fbbf24;
+  --warn-bg:rgba(245,158,11,.12);
+  --warn-bd:rgba(245,158,11,.35);
+  --purple:#c084fc;
+  --purple-bg:rgba(168,85,247,.14);
+  --purple-bd:rgba(168,85,247,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg-app);
+  color:var(--ink);
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#0B132B}
+::-webkit-scrollbar-thumb{background:#1C2541;border-radius:9999px}
+::-webkit-scrollbar-thumb:hover{background:#3A506B}
+
+/* Animations */
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.92)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse-dot{animation:pulseDot 2s cubic-bezier(.4,0,.6,1) infinite}
+
+/* ================= LOGIN / SIGNUP SCREEN ================= */
+#login{
+  min-height:100vh;
+  background:var(--bg-deep);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));
+  position:relative;
+  overflow:hidden;
+}
+.ambient-glow{
+  position:absolute;
+  width:380px;
+  height:380px;
+  border-radius:9999px;
+  filter:blur(80px);
+  pointer-events:none;
+}
+.ambient-glow.tl{top:10%;left:-100px;background:rgba(8,145,178,.14)}
+.ambient-glow.br{bottom:8%;right:-100px;background:rgba(37,99,235,.14)}
+
+.auth-shell{
+  width:100%;
+  max-width:1040px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:28px;
+  align-items:center;
+  position:relative;
+  z-index:1;
+}
+@media(min-width:860px){
+  .auth-shell{grid-template-columns:1.05fr .95fr;gap:44px}
+}
+.auth-hero{text-align:center}
+@media(min-width:860px){.auth-hero{text-align:left}}
+.hero-brand{
+  display:inline-flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:16px;
+}
+.hero-icon{
+  width:56px;height:56px;
+  border-radius:16px;
+  background:#131F3D;
+  border:1px solid rgba(34,211,238,.32);
+  color:var(--cyan);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 12px 28px rgba(8,51,68,.45);
+  flex:none;
+}
+.hero-eyebrow{
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--cyan);
+  display:block;
+}
+.hero-subline{font-size:12px;color:var(--ink-dim);display:block;margin-top:2px}
+.auth-hero h1{
+  margin:0;
+  font-size:clamp(1.6rem,3.6vw,2.35rem);
+  font-weight:800;
+  letter-spacing:-.025em;
+  color:#fff;
+  line-height:1.15;
+}
+.auth-hero-desc{
+  margin:10px auto 0;
+  max-width:480px;
+  font-size:13px;
+  line-height:1.6;
+  color:var(--ink-dim);
+}
+@media(min-width:860px){.auth-hero-desc{margin-left:0}}
+.hero-features{
+  display:none;
+  margin-top:22px;
+  gap:12px;
+}
+@media(min-width:860px){.hero-features{display:grid}}
+.feat-card{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px;
+  border-radius:14px;
+  background:rgba(15,23,46,.9);
+  border:1px solid var(--border);
+}
+.feat-card svg{width:18px;height:18px;flex:none;margin-top:2px}
+.feat-title{font-size:12px;font-weight:700;color:#fff}
+.feat-desc{font-size:11px;color:var(--ink-dim);margin-top:3px;line-height:1.45}
+
+.box{
+  width:100%;
+  max-width:440px;
+  margin:0 auto;
+  background:var(--card);
+  border:1px solid var(--border-soft);
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 24px 50px rgba(2,6,23,.7);
+}
+@media(min-width:640px){.box{padding:28px}}
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding:4px;
+  border-radius:12px;
+  background:var(--card-elev);
+  border:1px solid var(--border-soft);
+  margin-bottom:16px;
+}
+.auth-tab{
+  min-height:40px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--ink-dim);
+  font-size:12px;
+  font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;
+  transition:all .18s ease;
+}
+.auth-tab:hover{color:#fff}
+.auth-tab.active{background:#0891b2;color:#fff;box-shadow:0 4px 12px rgba(8,145,178,.3)}
+
+.sb-badge{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:var(--card-elev);
+  border:1px solid var(--border-soft);
+  margin-bottom:14px;
+  font-size:11px;
+}
+.sb-badge-left{display:flex;align-items:center;gap:8px;color:#e2e8f0;font-weight:600;min-width:0}
+.sb-badge-left span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-pill{
+  font-size:10px;
+  padding:3px 8px;
+  border-radius:6px;
+  background:#083344;
+  color:#67e8f9;
+  border:1px solid #155e75;
+  flex:none;
+}
+#sub{margin:0 0 14px;font-size:12px;color:var(--ink-dim);line-height:1.5}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin:0 0 6px}
+.fld label .req{color:var(--cyan)}
+.inp-wrap{position:relative}
+.inp-ico{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--ink-dim);pointer-events:none;
+}
+.inp-wrap input{
+  width:100%;
+  min-height:44px;
+  padding:10px 12px 10px 38px;
+  border-radius:10px;
+  background:var(--card-input);
+  border:1px solid #334155;
+  color:#fff;
+  font-size:13px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.inp-wrap input::placeholder{color:var(--ink-mute)}
+.inp-wrap input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
+.pw-toggle{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;
+  border:0;border-radius:8px;background:transparent;color:var(--ink-dim);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.pw-toggle:hover{color:#fff;background:rgba(255,255,255,.06)}
+
+.err{
+  color:#fda4af;
+  background:var(--bad-bg);
+  border:1px solid var(--bad-bd);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.45;
+  margin:0 0 12px;
+}
+.err:empty{display:none}
+
+.btn-primary{
+  width:100%;
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(90deg,#0891b2,#2563eb,#4f46e5);
+  color:#fff;
+  font-weight:700;
+  font-size:13px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(8,145,178,.22);
+  transition:filter .15s,transform .1s,opacity .15s;
+}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:active{transform:scale(.99)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+
+.btn-ghost-switch{
+  width:100%;
+  min-height:40px;
+  margin-top:10px;
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  background:transparent;
+  color:var(--cyan);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.btn-ghost-switch:hover{background:rgba(34,211,238,.08);color:#67e8f9}
+
+.auth-footer-note{
+  margin-top:16px;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(20,30,56,.75);
+  border:1px solid var(--border);
+  font-size:11px;
+  color:var(--ink-dim);
+  line-height:1.5;
+}
+.auth-footer-note strong{color:#e2e8f0;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+
+/* ================= TOP STICKY NAVBAR ================= */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:40;
+  width:100%;
+  background:rgba(11,19,43,.94);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding-top:env(safe-area-inset-top,0px);
+}
+.topbar-inner{
+  max-width:1440px;
+  margin:0 auto;
+  height:64px;
+  padding:0 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+@media(min-width:640px){.topbar-inner{padding:0 24px}}
+.brand-btn{
+  display:flex;align-items:center;gap:10px;
+  background:transparent;border:0;padding:0;text-align:left;cursor:pointer;min-width:0;
+}
+.brand-logo{
+  width:36px;height:36px;border-radius:10px;flex:none;
+  background:linear-gradient(135deg,#06b6d4,#2563eb);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(6,182,212,.22);
+}
+.brand-name{font-size:14px;font-weight:700;color:#fff;display:block;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:640px){.brand-name{font-size:15px}}
+.brand-sub{font-size:10px;font-weight:600;color:var(--cyan);display:block;letter-spacing:.04em;margin-top:2px}
+
+.nav-links{
+  display:none;
+  align-items:center;
+  gap:4px;
+}
+@media(min-width:768px){.nav-links{display:flex}}
+.nav-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:0;
+  background:transparent;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  white-space:nowrap;
+  position:relative;
+  transition:background .15s,color .15s;
+}
+.nav-btn:hover{color:#fff;background:rgba(30,41,59,.6)}
+.nav-btn.active{background:var(--card-hover);color:var(--cyan);font-weight:700}
+.nav-badge{
+  min-width:18px;height:18px;padding:0 5px;border-radius:9999px;
+  background:#f59e0b;color:#020617;font-size:10px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+
+.topbar-right{display:flex;align-items:center;gap:8px;flex:none}
+.esp-pill{
+  display:none;
+  align-items:center;gap:6px;
+  padding:5px 10px;
+  border-radius:8px;
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  border:1px solid var(--border);
+}
+@media(min-width:640px){.esp-pill{display:inline-flex}}
+.esp-pill.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:#6ee7b7}
+.esp-pill.bad{background:var(--bad-bg);border-color:var(--bad-bd);color:#fda4af}
+.esp-pill.warn{background:var(--warn-bg);border-color:var(--warn-bd);color:#fcd34d}
+.esp-pill .dot-s{width:7px;height:7px;border-radius:9999px;background:currentColor}
+
+.role-chip{
+  display:none;
+  align-items:center;gap:8px;
+  padding:5px 10px;
+  border-radius:8px;
+  background:#131F3D;
+  border:1px solid var(--border-soft);
+  font-size:11px;
+}
+@media(min-width:1100px){.role-chip{display:flex}}
+.role-chip .em-txt{color:var(--ink-dim);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.role-tag{
+  padding:2px 6px;border-radius:5px;
+  background:rgba(6,182,212,.15);color:#67e8f9;
+  font-size:10px;font-weight:700;text-transform:uppercase;
+}
+
+.signout-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:38px;padding:7px 12px;
+  border-radius:10px;
+  background:rgba(30,41,59,.65);
+  border:1px solid var(--border-soft);
+  color:#cbd5e1;
+  font-size:12px;font-weight:600;
+  cursor:pointer;
+  transition:all .15s;
+}
+.signout-btn:hover{background:rgba(244,63,94,.18);border-color:var(--bad-bd);color:#fda4af}
+
+/* ================= MAIN CONTAINER ================= */
+.page-wrap{
+  max-width:1440px;
+  margin:0 auto;
+  padding:20px 14px 88px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+@media(min-width:640px){.page-wrap{padding:24px 24px 88px;gap:22px}}
+@media(min-width:768px){.page-wrap{padding-bottom:32px}}
+
+.page-head{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+@media(min-width:768px){
+  .page-head{flex-direction:row;align-items:center;justify-content:space-between}
+}
+.page-title-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.page-title{margin:0;font-size:clamp(1.25rem,2.5vw,1.75rem);font-weight:800;letter-spacing:-.02em;color:#fff}
+.realtime-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 10px;border-radius:9999px;
+  background:var(--ok-bg);border:1px solid var(--ok-bd);
+  color:#6ee7b7;font-size:11px;font-weight:600;
+}
+.realtime-badge .dot-s{width:7px;height:7px;border-radius:9999px;background:var(--ok)}
+.page-subtitle{margin:4px 0 0;font-size:13px;color:var(--ink-dim)}
+
+.quick-actions{display:flex;flex-wrap:wrap;gap:8px}
+.qa-btn{
+  min-height:40px;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:8px 14px;
+  border-radius:10px;
+  font-size:12px;font-weight:600;
+  border:1px solid var(--border-soft);
+  background:var(--card-hover);
+  color:#e2e8f0;
+  cursor:pointer;
+  transition:all .15s;
+  position:relative;
+}
+.qa-btn:hover{background:#25396D;border-color:#475569;color:#fff}
+.qa-btn.emerald{background:#059669;border-color:#10b981;color:#fff}
+.qa-btn.emerald:hover{background:#10b981}
+.qa-btn.cyan{background:linear-gradient(90deg,#06b6d4,#2563eb);border-color:transparent;color:#fff}
+.qa-btn.cyan:hover{filter:brightness(1.08)}
+
+/* ================= METRIC CARDS ================= */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+@media(min-width:600px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1180px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
+
+.c{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px 18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:border-color .2s,background .2s;
+}
+.c:hover{border-color:#334155}
+.c-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.c .t{font-size:12px;font-weight:600;color:var(--ink-dim)}
+.c-ico{
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(34,211,238,.1);color:var(--cyan);
+}
+.c-ico.ok{background:var(--ok-bg);color:var(--ok)}
+.c-ico.bad{background:var(--bad-bg);color:var(--bad)}
+.c-ico.warn{background:var(--warn-bg);color:var(--warn)}
+
+.c .v{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(1.35rem,2.6vw,1.75rem);
+  font-weight:700;
+  color:#fff;
+  line-height:1.15;
+  display:flex;align-items:center;gap:8px;
+}
+.c .s{font-size:11px;color:var(--ink-dim);margin-top:4px}
+.c-foot{
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid rgba(30,41,59,.85);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:11px;color:var(--ink-dim);
+}
+.status-pill{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  padding:3px 8px;border-radius:6px;border:1px solid var(--border);
+  background:var(--card-elev);color:#cbd5e1;
+}
+
+.c.ok{border-color:rgba(16,185,129,.28)}
+.c.ok .v{color:var(--ok)}
+.c.ok .status-pill{background:var(--ok-bg);border-color:var(--ok-bd);color:#6ee7b7}
+.c.bad{border-color:rgba(244,63,94,.28)}
+.c.bad .v{color:var(--bad)}
+.c.bad .status-pill{background:var(--bad-bg);border-color:var(--bad-bd);color:#fda4af}
+.c.warn{border-color:rgba(245,158,11,.28)}
+.c.warn .v{color:var(--warn)}
+.c.warn .status-pill{background:var(--warn-bg);border-color:var(--warn-bd);color:#fcd34d}
+
+.dot{display:inline-block;width:10px;height:10px;border-radius:9999px;background:currentColor;flex:none}
+.c.ok .dot{box-shadow:0 0 10px rgba(52,211,153,.7);animation:pulseDot 1.8s infinite}
+.c.bad .dot{box-shadow:0 0 10px rgba(251,113,133,.6)}
+
+/* ================= GATES & OCCUPANCY STRIP ================= */
+.strip-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+@media(min-width:900px){.strip-grid{grid-template-columns:repeat(3,1fr)}}
+
+.gate-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.gate-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gate-label{font-size:12px;font-weight:700;letter-spacing:.04em;color:#cbd5e1}
+.gate-pin{
+  font-size:10px;padding:3px 8px;border-radius:6px;
+  background:rgba(8,51,68,.7);color:var(--cyan);border:1px solid rgba(21,94,117,.6);
+}
+.gate-body{display:flex;align-items:center;gap:16px;margin:16px 0}
+.gate-sim{
+  position:relative;
+  width:82px;height:62px;
+  border-radius:10px;
+  background:var(--card-input);
+  border:1px solid rgba(51,65,85,.7);
+  display:flex;align-items:center;justify-content:flex-start;
+  padding-left:16px;
+  overflow:hidden;
+  flex:none;
+}
+.gate-post{width:10px;height:34px;background:#475569;border-radius:3px}
+.gate-arm{
+  position:absolute;left:24px;height:6px;width:48px;border-radius:4px;
+  background:var(--warn);
+  transform-origin:left center;
+  transition:transform .45s cubic-bezier(.4,0,.2,1),background .25s;
+}
+.gate-arm.exit{background:var(--ok)}
+.gate-card.warn .gate-arm{transform:rotate(-58deg)}
+.gate-status-txt{font-size:15px;font-weight:700;color:#fff}
+.gate-card.ok .gate-status-txt{color:var(--ok)}
+.gate-card.warn .gate-status-txt{color:var(--warn)}
+.gate-card.bad .gate-status-txt{color:var(--bad)}
+.gate-sub{font-size:11px;color:var(--ink-dim);margin-top:3px}
+
+/* Occupancy Progress & Mini Grid */
+.occ-bar-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-dim);margin:14px 0 6px}
+.occ-track{height:10px;width:100%;background:var(--card-input);border-radius:9999px;overflow:hidden}
+.occ-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#06b6d4,#2563eb);
+  border-radius:9999px;
+  transition:width .45s ease;
+}
+.mini-bays{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(54px,1fr));
+  gap:6px;
+}
+.mini-bay{
+  padding:7px 4px;
+  border-radius:8px;
+  text-align:center;
+  border:1px solid var(--border);
+  font-size:10px;
+}
+.mini-bay.free{background:var(--ok-bg);border-color:var(--ok-bd);color:#6ee7b7}
+.mini-bay.taken{background:var(--bad-bg);border-color:var(--bad-bd);color:#fda4af}
+.mini-bay .b-num{font-size:9px;color:var(--ink-dim);display:block}
+.mini-bay .b-st{font-weight:700;display:block;margin-top:1px}
+
+/* ================= ADMIN ACTION CONSOLE & SPLIT PANEL ================= */
+.action-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+@media(min-width:900px){.action-grid{grid-template-columns:repeat(4,1fr)}}
+.act{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  text-align:left;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;
+  transition:all .18s ease;
+}
+.act:hover{background:var(--card-elev);border-color:rgba(34,211,238,.45);transform:translateY(-1px)}
+.act-ico{
+  width:40px;height:40px;border-radius:10px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(6,182,212,.12);color:var(--cyan);border:1px solid rgba(6,182,212,.25);
+}
+.act-ico.purple{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-bd)}
+.act-ico.emerald{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.act-ico.blue{background:rgba(37,99,235,.15);color:#60a5fa;border-color:rgba(59,130,246,.3)}
+.act-title{font-size:13px;font-weight:700;color:#fff;display:block}
+.act-desc{font-size:11px;color:var(--ink-dim);display:block;margin-top:2px}
+.nd{
+  position:absolute;top:12px;right:12px;
+  width:11px;height:11px;border-radius:9999px;
+  background:#f59e0b;
+  box-shadow:0 0 0 3px rgba(245,158,11,.25);
+}
+
+.split-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+@media(min-width:980px){.split-grid{grid-template-columns:2fr 1fr}}
+
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.panel-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#fff}
+.panel-tag{font-size:10px;padding:2px 7px;border-radius:6px;background:#1e293b;color:var(--ink-dim)}
+.link-btn{
+  background:transparent;border:0;color:var(--cyan);font-size:12px;font-weight:600;
+  display:inline-flex;align-items:center;gap:4px;cursor:pointer;
+}
+.link-btn:hover{color:#67e8f9}
+
+.feed-list{display:flex;flex-direction:column}
+.feed-item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 8px;
+  border-bottom:1px solid rgba(30,41,59,.8);
+  border-radius:8px;
+}
+.feed-item:last-child{border-bottom:0}
+.feed-item:hover{background:rgba(30,41,59,.3)}
+.feed-left{display:flex;align-items:center;gap:11px;min-width:0}
+.feed-ico{
+  width:34px;height:34px;border-radius:9px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ok-bg);border:1px solid var(--ok-bd);color:var(--ok);
+}
+.feed-name{font-size:12px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed-meta{font-size:11px;color:var(--ink-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed-right{text-align:right;flex:none}
+.feed-badge{font-size:10px;font-weight:700;color:var(--ok)}
+.feed-time{font-size:10px;color:var(--ink-mute);margin-top:2px}
+
+.hw-box{
+  border-radius:12px;
+  border:1px solid var(--border-soft);
+  background:var(--bg-deep);
+  padding:14px;
+  margin-bottom:14px;
+}
+.hw-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.hw-cell{padding:8px 10px;border-radius:8px;background:#131F3D;border:1px solid var(--border);font-size:11px}
+.hw-cell span{display:block}
+.hw-k{font-size:10px;color:var(--ink-dim)}
+.hw-v{font-weight:700;color:#67e8f9;margin-top:2px}
+.hw-specs{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--ink-dim);margin-top:12px}
+.hw-spec-row{display:flex;justify-content:space-between;gap:8px}
+.hw-spec-row span:last-child{color:#67e8f9}
+
+/* ================= DRIVER / SPACES VIEW ================= */
+.driver-pass{
+  border-radius:18px;
+  background:linear-gradient(90deg,#0F1D40,#132554,#0F1D40);
+  border:1px solid rgba(34,211,238,.4);
+  padding:18px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  box-shadow:0 16px 36px rgba(2,6,23,.55);
+}
+@media(min-width:640px){
+  .driver-pass{flex-direction:row;align-items:center;justify-content:space-between}
+}
+.pass-left{display:flex;align-items:center;gap:14px;min-width:0}
+.pass-ico{
+  width:48px;height:48px;border-radius:12px;flex:none;
+  background:rgba(6,182,212,.18);border:1px solid rgba(34,211,238,.4);
+  color:#67e8f9;display:flex;align-items:center;justify-content:center;
+}
+.pass-title{font-size:16px;font-weight:700;color:#fff}
+.pass-sub{font-size:12px;color:#cbd5e1;margin-top:3px}
+.pin-pill{
+  padding:10px 16px;
+  border-radius:12px;
+  background:rgba(9,15,33,.85);
+  border:1px solid var(--border-soft);
+  text-align:left;
+  flex:none;
+}
+@media(min-width:640px){.pin-pill{text-align:right}}
+.pin-pill-lbl{font-size:10px;text-transform:uppercase;color:var(--ink-dim);display:block;letter-spacing:.05em}
+#pin{font-size:18px;font-weight:700;color:var(--cyan);display:block;margin-top:2px}
+
+.freec{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.freec.ok{border-color:var(--ok-bd)}
+.freec.bad{border-color:var(--bad-bd)}
+.freec-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+#freev{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(1.6rem,5vw,2.6rem);
+  font-weight:800;
+  color:#fff;
+}
+.freec.ok #freev{color:var(--ok)}
+.freec.bad #freev{color:var(--bad)}
+
+.slots-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+  gap:12px;
+}
+.slot-card{
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#141B30;
+  transition:transform .15s,border-color .15s;
+}
+.slot-card.free{background:rgba(6,78,59,.22);border-color:rgba(16,185,129,.42)}
+.slot-card.taken{background:#141B30;border-color:rgba(244,63,94,.35)}
+.slot-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.slot-id{font-size:14px;font-weight:700;color:#fff}
+.slot-dot{width:8px;height:8px;border-radius:9999px}
+.slot-card.free .slot-dot{background:var(--ok);box-shadow:0 0 8px rgba(52,211,153,.6)}
+.slot-card.taken .slot-dot{background:var(--bad)}
+.slot-state{font-size:12px;font-weight:700}
+.slot-card.free .slot-state{color:var(--ok)}
+.slot-card.taken .slot-state{color:var(--bad)}
+.slot-meta{font-size:10px;color:var(--ink-dim);margin-top:3px}
+
+/* ================= FULLSCREEN DRIVER STATUS STATES ================= */
+.state-screen{
+  position:fixed;
+  inset:0;
+  z-index:60;
+  background:var(--bg-deep);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px));
+}
+.state-card{
+  width:100%;
+  max-width:460px;
+  background:var(--card);
+  border:1px solid var(--border-soft);
+  border-radius:20px;
+  padding:30px 24px;
+  text-align:center;
+  box-shadow:0 24px 50px rgba(2,6,23,.75);
+  position:relative;
+  z-index:1;
+}
+.state-ico{
+  width:64px;height:64px;border-radius:16px;
+  margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;
+}
+.state-ico.warn{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn)}
+.state-ico.bad{background:var(--bad-bg);border:1px solid var(--bad-bd);color:var(--bad)}
+.state-card .w1{font-size:clamp(1.35rem,4vw,1.75rem);font-weight:800;color:#fff;margin-bottom:8px}
+.state-card .w2{
+  font-size:13px;color:#cbd5e1;
+  background:var(--card-input);border:1px solid var(--border-soft);
+  border-radius:12px;padding:12px 14px;margin-top:14px;line-height:1.5;
+}
+.state-signout{
+  position:fixed;
+  top:calc(16px + env(safe-area-inset-top,0px));
+  right:16px;
+  z-index:65;
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 14px;border-radius:10px;
+  background:rgba(15,23,46,.9);border:1px solid var(--border-soft);
+  color:#e2e8f0;font-size:12px;font-weight:600;cursor:pointer;
+}
+.state-signout:hover{background:var(--bad-bg);border-color:var(--bad-bd);color:#fda4af}
+
+/* ================= MODAL SHEET ================= */
+#modal{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(2,6,23,.78);
+  backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px));
+}
+.sheet{
+  background:var(--card);
+  border:1px solid var(--border-soft);
+  width:100%;max-width:680px;max-height:88vh;
+  border-radius:18px;
+  display:flex;flex-direction:column;
+  padding:18px 20px;
+  box-shadow:0 24px 60px rgba(0,0,0,.75);
+}
+.sh{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:10px;
+}
+.sh h2{margin:0;font-size:16px;font-weight:700;color:#fff}
+.x{
+  border:1px solid var(--border-soft);
+  background:var(--card-input);
+  color:#e2e8f0;
+  border-radius:9px;
+  padding:7px 13px;
+  font-size:12px;font-weight:600;
+  cursor:pointer;
+}
+.x:hover{background:#233468;color:#fff}
+#ml{overflow-y:auto;min-height:0;padding-right:2px}
+.r{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 6px;
+  border-bottom:1px solid rgba(30,41,59,.85);
+}
+.r:last-child{border-bottom:0}
+.n{font-size:13px;font-weight:700;color:#f1f5f9}
+.id{font-size:11px;color:var(--ink-dim);margin-top:3px;font-family:'JetBrains Mono',monospace}
+.tag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px;flex:none;border:1px solid transparent}
+.tag.in{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.tag.out{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)}
+.rv,.rs{
+  flex:none;border-radius:9px;padding:8px 13px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .15s;
+}
+.rv{background:var(--bad-bg);border:1px solid var(--bad-bd);color:#fda4af}
+.rv:hover{background:rgba(244,63,94,.22)}
+.rv.on{background:#e11d48;border-color:#f43f5e;color:#fff}
+.rs{background:var(--ok-bg);border:1px solid var(--ok-bd);color:#6ee7b7}
+.rs:hover{background:rgba(16,185,129,.22)}
+.empty{color:var(--ink-dim);text-align:center;padding:28px 12px;font-size:13px}
+
+.q{
+  padding:14px;
+  margin-bottom:10px;
+  border-radius:12px;
+  background:var(--card-elev);
+  border:1px solid rgba(245,158,11,.3);
+}
+.qf{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.qf select{
+  flex:1;min-width:140px;min-height:40px;
+  padding:8px 10px;border-radius:9px;
+  background:var(--card-input);border:1px solid #334155;color:#fff;font-size:12px;
+}
+.qf select:focus{outline:none;border-color:var(--cyan)}
+.qe{color:#fda4af;font-weight:600;font-size:12px;min-height:1em;margin:6px 0}
+.qe:empty{display:none}
+
+/* ================= MOBILE BOTTOM NAV ================= */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(11,19,43,.95);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media(min-width:768px){.bottom-nav{display:none}}
+.bottom-nav-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  max-width:480px;margin:0 auto;height:62px;padding:0 6px;
+}
+.bnav-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:transparent;border:0;color:var(--ink-dim);font-size:10px;font-weight:600;
+  cursor:pointer;position:relative;
+}
+.bnav-btn.active{color:var(--cyan)}
+.bnav-ico{padding:4px 10px;border-radius:8px;position:relative}
+.bnav-btn.active .bnav-ico{background:var(--card-hover)}
+.bnav-dot{
+  position:absolute;top:2px;right:6px;
+  width:8px;height:8px;border-radius:9999px;background:#f59e0b;
+}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN / SIGNUP ==================== -->
+<section id="login">
+  <div class="ambient-glow tl"></div>
+  <div class="ambient-glow br"></div>
+  <div class="auth-shell">
+    <div class="auth-hero">
+      <div class="hero-brand">
+        <div class="hero-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        </div>
+        <div>
+          <span class="hero-eyebrow mono">ESP32 DevKit V1 · Supabase Realtime</span>
+          <span class="hero-subline">Dual-Gate Barrier &amp; Bay Telemetry</span>
+        </div>
+      </div>
+      <h1>Smart Parking Security Gateway</h1>
+      <p class="auth-hero-desc">
+        Sign in or create a driver account to monitor live parking bay availability, manage RFID and PIN gate passes, and supervise ESP32 gateway operations.
+      </p>
+      <div class="hero-features">
+        <div class="feat-card">
+          <svg style="color:#34d399" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+          <div>
+            <div class="feat-title">Live Bay Occupancy &amp; Telemetry</div>
+            <div class="feat-desc">Real-time Postgres sync with automatic ESP32 heartbeat monitoring and instant gate status updates.</div>
+          </div>
+        </div>
+        <div class="feat-card">
+          <svg style="color:#22d3ee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+          <div>
+            <div class="feat-title">Role-Verified Security Dashboards</div>
+            <div class="feat-desc">Dedicated Administrator and Driver portals protected by Supabase Auth and Row Level Security.</div>
+          </div>
+        </div>
+        <div class="feat-card">
+          <svg style="color:#60a5fa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          <div>
+            <div class="feat-title">Hardware Gate &amp; RFID Audit Trail</div>
+            <div class="feat-desc">Manages RFID card credentials, keypad PINs, driver approvals, and live barrier entry logs.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form class="box" id="f" autocomplete="on" onsubmit="return false">
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabIn" onclick="setMode(false)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+          <span>Sign In</span>
+        </button>
+        <button type="button" class="auth-tab" id="tabUp" onclick="setMode(true)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+          <span>Sign Up</span>
+        </button>
+      </div>
+
+      <div class="sb-badge">
+        <div class="sb-badge-left">
+          <svg width="15" height="15" style="color:var(--cyan);flex:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="mono">Supabase Auth Gateway</span>
+        </div>
+        <span class="sb-pill mono">Profiles Verified</span>
+      </div>
+
+      <p id="sub">Sign in to continue.</p>
+
+      <p class="err" id="err" role="alert"></p>
+
+      <div class="fld" id="nmw" hidden>
+        <label for="nm">Full Name <span class="req">*</span></label>
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input id="nm" autocomplete="name" placeholder="Your full name">
+        </div>
+      </div>
+
+      <div class="fld">
+        <label for="em">Email Address <span class="req">*</span></label>
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input id="em" type="email" autocomplete="username" required placeholder="example@parking.com" class="mono">
+        </div>
+      </div>
+
+      <div class="fld">
+        <label for="pw">Password <span class="req">*</span></label>
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input id="pw" type="password" autocomplete="current-password" required placeholder="Your password" class="mono" style="padding-right:42px">
+          <button type="button" class="pw-toggle" id="pwEye" aria-label="Toggle password visibility">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="go" type="submit">Sign in</button>
+      <button class="btn-ghost-switch" id="sw" type="button">New driver? Create account</button>
+
+      <div class="auth-footer-note">
+        <strong>
+          <svg width="13" height="13" style="color:var(--cyan)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+          Supabase Identity &amp; Role Enforcement
+        </strong>
+        Access routes automatically to the Administrator Gateway or Driver Pass portal based on your verified profile role.
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ==================== ADMIN DASHBOARD ==================== -->
+<section id="dash" hidden>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button type="button" class="brand-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <div class="brand-logo">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        </div>
+        <div>
+          <span class="brand-name">Smart Parking Gateway</span>
+          <span class="brand-sub">ESP32 IoT Security</span>
+        </div>
+      </button>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <button type="button" class="nav-btn active">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="nav-btn" onclick="$('bSp').click()">
+          <svg width="15" height="15" style="color:var(--ok)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Spaces</span>
+        </button>
+        <button type="button" class="nav-btn" onclick="$('bReq').click()">
+          <svg width="15" height="15" style="color:var(--purple)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+          <span>Approvals</span>
+          <span class="nav-badge mono" id="navReqBadge" hidden>0</span>
+        </button>
+        <button type="button" class="nav-btn" onclick="$('bEnt').click()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <span>Entries</span>
+        </button>
+        <button type="button" class="nav-btn" onclick="$('bEdit').click()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Access</span>
+        </button>
+      </nav>
+
+      <div class="topbar-right">
+        <div class="esp-pill warn mono" id="navEspPill">
+          <span class="dot-s"></span>
+          <span id="navEspTxt">CHECKING</span>
+        </div>
+        <div class="role-chip">
+          <span class="em-txt mono" id="navAdminEmail">admin</span>
+          <span class="role-tag">Admin</span>
+        </div>
+        <button id="out" class="signout-btn" title="Sign out from gateway">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <!-- Page Header -->
+    <div class="page-head">
+      <div>
+        <div class="page-title-row">
+          <h1 class="page-title">Smart Parking Dashboard</h1>
+          <span class="realtime-badge mono">
+            <span class="dot-s pulse-dot"></span>
+            <span>Realtime Synced</span>
+          </span>
+        </div>
+        <p class="page-subtitle">Real-time IoT gateway security, live capacity monitoring &amp; ESP32 telemetry</p>
+      </div>
+      <div class="quick-actions">
+        <button type="button" class="qa-btn emerald" id="bSp">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+          <span id="bSpLabel">Parking Spaces</span>
+        </button>
+        <button type="button" class="qa-btn" id="bEnt">
+          <svg width="15" height="15" style="color:var(--cyan)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <span>Entries</span>
+        </button>
+        <button type="button" class="qa-btn" id="bEdit">
+          <svg width="15" height="15" style="color:var(--cyan)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Edit access</span>
+        </button>
+        <button type="button" class="qa-btn cyan" id="bReq">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+          <span>New Driver Request</span>
+          <span class="nd" id="rdot" hidden></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Top 4 Metric Cards -->
+    <div class="kpi-grid">
+      <div class="c" id="esp">
+        <div class="c-top">
+          <span class="t">ESP32 connection</span>
+          <span class="status-pill mono" id="espBadge">CHECKING</span>
+        </div>
+        <div class="v" id="espv"></div>
+        <div class="c-foot">
+          <span>Heartbeat</span>
+          <span class="mono" id="esps">Waiting for signal…</span>
+        </div>
+      </div>
+
+      <div class="c" id="capCard">
+        <div class="c-top">
+          <span class="t">Parking Capacity</span>
+          <div class="c-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          </div>
+        </div>
+        <div class="v" id="capVal" style="color:var(--cyan)">0 <span style="font-size:12px;font-weight:500;color:var(--ink-dim)">/ 0</span></div>
+        <div class="c-foot">
+          <span>Facility status</span>
+          <span id="capStatus" style="font-weight:700;color:var(--ok)">Checking…</span>
+        </div>
+      </div>
+
+      <div class="c ok">
+        <div class="c-top">
+          <span class="t">Entry granted</span>
+          <div class="c-ico ok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+        </div>
+        <div class="v" id="gr">0</div>
+        <div class="c-foot">
+          <span>Auth success rate</span>
+          <span class="mono" id="authRate" style="color:#e2e8f0;font-weight:600">100%</span>
+        </div>
+      </div>
+
+      <div class="c bad">
+        <div class="c-top">
+          <span class="t">Entry denied</span>
+          <div class="c-ico bad">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          </div>
+        </div>
+        <div class="v" id="de">0</div>
+        <div class="c-foot">
+          <span>Security rejections</span>
+          <span style="color:#fda4af">Unregistered RFID/PIN</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gate Barriers & Parking Occupancy Strip -->
+    <div class="strip-grid">
+      <div class="gate-card" id="en">
+        <div>
+          <div class="gate-head">
+            <span class="gate-label">ENTRY GATE</span>
+            <span class="gate-pin mono">SERVO 1 (GPIO 16)</span>
+          </div>
+          <div class="gate-body">
+            <div class="gate-sim">
+              <div class="gate-post"></div>
+              <div class="gate-arm"></div>
+            </div>
+            <div>
+              <div class="gate-status-txt" id="env">Unknown</div>
+              <div class="gate-sub mono">Entry barrier actuator</div>
+            </div>
+          </div>
+        </div>
+        <div class="c-foot">
+          <span>Gateway sync</span>
+          <span class="mono" id="enLoop">Awaiting ESP32</span>
+        </div>
+      </div>
+
+      <div class="gate-card" id="ex">
+        <div>
+          <div class="gate-head">
+            <span class="gate-label">EXIT GATE</span>
+            <span class="gate-pin mono">SERVO 2 (GPIO 17)</span>
+          </div>
+          <div class="gate-body">
+            <div class="gate-sim">
+              <div class="gate-post"></div>
+              <div class="gate-arm exit"></div>
+            </div>
+            <div>
+              <div class="gate-status-txt" id="exv">Unknown</div>
+              <div class="gate-sub mono">Exit barrier actuator</div>
+            </div>
+          </div>
+        </div>
+        <div class="c-foot">
+          <span>Gateway sync</span>
+          <span class="mono" id="exLoop">Awaiting ESP32</span>
+        </div>
+      </div>
+
+      <div class="gate-card">
+        <div>
+          <div class="gate-head">
+            <span class="gate-label">PARKING OCCUPANCY</span>
+            <span class="gate-pin mono" id="occCapBadge">TOTAL: 0</span>
+          </div>
+          <div class="occ-bar-meta">
+            <span id="occFreeTxt">0 spots available</span>
+            <span class="mono" id="occPctTxt" style="color:var(--cyan);font-weight:700">0% Occupied</span>
+          </div>
+          <div class="occ-track"><div class="occ-fill" id="occFill"></div></div>
+          <div class="mini-bays mono" id="miniBays"></div>
+        </div>
+        <div class="c-foot">
+          <span id="occRatio">Occupied (0/0)</span>
+          <span class="mono" style="color:var(--cyan)">Supabase: parking_spaces</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split: Recent Event Log + Hardware Controller -->
+    <div class="split-grid">
+      <div class="panel">
+        <div>
+          <div class="panel-head">
+            <div class="panel-title">
+              <svg width="16" height="16" style="color:var(--cyan)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+              <span>Recent Entry Log</span>
+              <span class="panel-tag mono">event_log</span>
+            </div>
+            <button type="button" class="link-btn" onclick="$('bEnt').click()">
+              <span>View Full History</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div class="feed-list" id="recentFeed">
+            <p class="empty">Loading recent entries…</p>
+          </div>
+        </div>
+        <div class="c-foot">
+          <span id="recentCount">Latest barrier_open_accepted events</span>
+          <button type="button" class="link-btn" onclick="$('bEdit').click()">Manage Driver Access →</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div>
+          <div class="panel-head">
+            <span class="gate-label">HARDWARE CONTROLLER</span>
+            <span class="mono" style="font-size:10px;color:var(--cyan)">ESP32 DEVKIT V1</span>
+          </div>
+          <div class="hw-box">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <svg width="15" height="15" style="color:var(--cyan)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+                <span style="font-size:12px;font-weight:700;color:#fff">ESP32-WROOM-32</span>
+              </div>
+              <span class="status-pill mono" style="color:var(--ok);border-color:var(--ok-bd);background:var(--ok-bg)">240MHz</span>
+            </div>
+            <div class="hw-grid mono">
+              <div class="hw-cell"><span class="hw-k">Bus 1 · SPI</span><span class="hw-v">MFRC522 RFID</span></div>
+              <div class="hw-cell"><span class="hw-k">Bus 2 · I2C</span><span class="hw-v">1602 LCD</span></div>
+              <div class="hw-cell"><span class="hw-k">Dual PWM Servo</span><span class="hw-v" style="color:var(--warn)">GPIO 16 &amp; 17</span></div>
+              <div class="hw-cell"><span class="hw-k">Optical IR Loop</span><span class="hw-v" style="color:var(--ok)">GPIO 34 &amp; 35</span></div>
+            </div>
+          </div>
+          <div class="hw-specs">
+            <div class="hw-spec-row"><span>RFID Reader</span><span class="mono">MFRC522 (SPI)</span></div>
+            <div class="hw-spec-row"><span>Keypad Auth</span><span class="mono">4x4 Matrix PIN</span></div>
+            <div class="hw-spec-row"><span>Gate Actuators</span><span class="mono">Dual MG996R Servos</span></div>
+          </div>
+        </div>
+        <button type="button" class="qa-btn" style="width:100%;margin-top:16px" onclick="$('bSp').click()">
+          <svg width="15" height="15" style="color:var(--cyan)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Inspect Parking Bays</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <div class="bottom-nav-grid">
+      <button type="button" class="bnav-btn active">
+        <div class="bnav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>
+        <span>Dashboard</span>
+      </button>
+      <button type="button" class="bnav-btn" onclick="$('bSp').click()">
+        <div class="bnav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <span>Spaces</span>
+      </button>
+      <button type="button" class="bnav-btn" onclick="$('bReq').click()">
+        <div class="bnav-ico">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+          <span class="bnav-dot" id="bnavDot" hidden></span>
+        </div>
+        <span>Approvals</span>
+      </button>
+      <button type="button" class="bnav-btn" onclick="$('bEdit').click()">
+        <div class="bnav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <span>Access</span>
+      </button>
+    </div>
+  </nav>
+</section>
+
+<!-- ==================== ADMIN MANAGEMENT MODAL ==================== -->
+<div id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <div class="sh">
+      <h2 id="mt"></h2>
+      <button class="x" id="mx">Close</button>
+    </div>
+    <div class="qe" id="mm" role="alert"></div>
+    <div id="ml"></div>
+  </div>
+</div>
+
+<!-- ==================== DRIVER / PARKING SPACES VIEW ==================== -->
+<section id="user" hidden>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-btn" style="cursor:default">
+        <div class="brand-logo">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        </div>
+        <div>
+          <span class="brand-name">Smart Parking Gateway</span>
+          <span class="brand-sub">LIVE BAY TELEMETRY</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="role-chip">
+          <span class="em-txt mono" id="navUserEmail">driver</span>
+          <span class="role-tag" id="navUserRole">Driver</span>
+        </div>
+        <button id="out2" class="signout-btn">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <div class="page-head">
+      <div>
+        <div class="page-title-row">
+          <h1 class="page-title">Parking Space Availability</h1>
+          <span class="realtime-badge mono">
+            <span class="dot-s pulse-dot"></span>
+            <span>LIVE TELEMETRY</span>
+          </span>
+        </div>
+        <p class="page-subtitle">Real-time bay occupation status detected via ESP32 IR gateway sensors</p>
+      </div>
+    </div>
+
+    <!-- Driver Gate Pass Card (hidden when admin previews spaces) -->
+    <div class="driver-pass" id="driverPassCard">
+      <div class="pass-left">
+        <div class="pass-ico">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div>
+          <div class="pass-title" id="driverPassName">Authorized Driver</div>
+          <div class="pass-sub mono">Active Gate Pass · Keypad &amp; RFID Access</div>
+        </div>
+      </div>
+      <div class="pin-pill">
+        <span class="pin-pill-lbl">Assigned Gate Credential</span>
+        <span class="pinb mono" id="pin"></span>
+      </div>
+    </div>
+
+    <!-- Available Spaces Card + Bay Grid -->
+    <div class="c freec" id="freec">
+      <div class="freec-top">
+        <div>
+          <div class="t" style="margin-bottom:4px">Parking spaces available</div>
+          <div class="v" id="freev"></div>
+        </div>
+        <div class="c-ico ok" style="width:44px;height:44px;border-radius:12px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+        </div>
+      </div>
+
+      <div class="occ-track"><div class="occ-fill" id="userOccFill"></div></div>
+
+      <div class="slots-grid mono" id="userBayGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DRIVER STATUS SCREENS ==================== -->
+<section id="wait" class="state-screen" hidden>
+  <div class="ambient-glow tl"></div>
+  <div class="ambient-glow br"></div>
+  <button id="out3" class="state-signout">Sign out</button>
+  <div class="state-card">
+    <div class="state-ico warn">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <span class="status-pill mono" style="color:var(--warn);border-color:var(--warn-bd);background:var(--warn-bg);margin-bottom:12px;display:inline-block">PENDING APPROVAL</span>
+    <div class="w1">Waiting for approval</div>
+    <div style="font-size:13px;color:var(--ink-dim);line-height:1.5">Your driver registration is queued for administrator review and RFID/PIN assignment.</div>
+    <div class="w2" id="wt2"></div>
+  </div>
+</section>
+
+<section id="revoked" class="state-screen" hidden>
+  <div class="ambient-glow tl"></div>
+  <div class="ambient-glow br"></div>
+  <button id="out4" class="state-signout">Sign out</button>
+  <div class="state-card">
+    <div class="state-ico bad">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m14.5 9.5-5 5"/><path d="m9.5 9.5 5 5"/></svg>
+    </div>
+    <span class="status-pill mono" style="color:var(--bad);border-color:var(--bad-bd);background:var(--bad-bg);margin-bottom:12px;display:inline-block">ACCESS REVOKED</span>
+    <div class="w1">Your access has been Revoked</div>
+    <div style="font-size:13px;color:var(--ink-dim);line-height:1.5">Your RFID card and keypad PIN have been deactivated by the gateway administrator.</div>
+    <div class="w2" id="wt3"></div>
+  </div>
+</section>
+
+<section id="denied" class="state-screen" hidden>
+  <div class="ambient-glow tl"></div>
+  <div class="ambient-glow br"></div>
+  <button id="out5" class="state-signout">Sign out</button>
+  <div class="state-card">
+    <div class="state-ico bad">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+    </div>
+    <span class="status-pill mono" style="color:var(--bad);border-color:var(--bad-bd);background:var(--bad-bg);margin-bottom:12px;display:inline-block">REQUEST DENIED</span>
+    <div class="w1">Request Denied</div>
+    <div style="font-size:13px;color:var(--ink-dim);line-height:1.5">Your registration request was declined by the parking gateway administrator.</div>
+    <div class="w2" id="wt4"></div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.4/dist/umd/supabase.js"></script>
+<script>
+/* =====================================================================
+   SMART PARKING GATEWAY - WEBPAGE (SUPABASE VERSION)
+   Works with parking-supabase-setup-v2.sql. Fill in the two values below.
+   ===================================================================== */
+
+/* ---- Settings: FILL THESE IN ---- */
+var SUPABASE_URL = "https://gtdzeulsiwjlkmoogmln.supabase.co/rest/v1/";   // Supabase > Project Settings > API Keys > Project URL
+var SUPABASE_KEY = "sb_publishable_jmvx7Mdx4Jt9-_3q1Bqa5A_JCNXWifk";               // the PUBLISHABLE key only. NEVER the secret/service_role key.
+var ADMIN_CONTACT = "rajveermatharu277@gmail.com";    // admin contact shown to drivers who are waiting, denied or revoked
+var ESP_OFFLINE_AFTER_S = 20;        // the ESP32 counts as online if it reported within this many seconds
+var POLL_MS = 5000;                  // how often the page re-checks the database (live updates arrive faster)
+
+var sb = null;
+var configured = SUPABASE_URL.indexOf("YOUR-PROJECT-ID") < 0 && SUPABASE_KEY.indexOf("YOUR_KEY") < 0;
+try { if (configured && window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (x) {}
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function fmtUid(u){ return u ? String(u).replace(/(..)(?=.)/g, "$1:") : ""; }   // DEADBEEF -> DE:AD:BE:EF
+function fmtTime(t){ try { return new Date(t).toLocaleString([], {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"}); } catch (x) { return ""; } }
+
+/* ---- State ---- */
+var profile = null;      // the signed-in account (profiles row): role admin / driver, status pending / approved / denied / revoked
+var myDriver = null;     // a driver's own card and PIN row
+var viewSpaces = false;  // admin is looking at the parking-spaces screen
+var state = {total:0, taken:0, lastSeen:undefined, granted:0, denied:0, entry:"closed", exit:"closed", spaces:[]};
+var espSeen, espChangedAt = 0, espFirstLoadAt = 0;
+var drivers = [], requests = [], logRows = [], rfidCards = [], pinPool = [];
+var view = null, pend = null, pt = null, reqKey = "";
+var channel = null, pollTimer = null, clockTimer = null;
+
+/* ---- Loading data from the database ---- */
+async function loadStatus(){
+  var r = await sb.from("gateway_status").select("*").eq("id", 1).maybeSingle();
+  if (r.error || !r.data) return;
+  var g = r.data;
+  if (espSeen === undefined) { espSeen = g.esp_last_seen; espFirstLoadAt = Date.now(); }
+  else if (g.esp_last_seen !== espSeen) { espSeen = g.esp_last_seen; espChangedAt = Date.now(); }
+  state.lastSeen = g.esp_last_seen; state.granted = g.granted; state.denied = g.denied;
+  state.entry = g.entry_gate; state.exit = g.exit_gate;
+}
+async function loadSpaces(){
+  var r = await sb.from("parking_spaces").select("id,taken");
+  if (r.error || !r.data) return;
+  state.spaces = r.data.slice().sort(function(a, b){ return Number(a.id) - Number(b.id); });
+  state.total = r.data.length;
+  state.taken = r.data.filter(function(s){ return s.taken; }).length;
+}
+async function loadEntries(){
+  var r = await sb.from("event_log").select("created_at,driver_code,name,rfid_uid,pin")
+    .eq("event_type", "barrier_open_accepted").order("created_at", {ascending:false}).limit(100);
+  if (!r.error && r.data) logRows = r.data;
+  return r.error;
+}
+async function loadDrivers(){
+  var r = await sb.from("drivers").select("*").order("is_master", {ascending:false}).order("created_at", {ascending:true});
+  if (!r.error && r.data) drivers = r.data;
+  return r.error;
+}
+async function loadRequests(){
+  var r = await sb.from("profiles").select("id,email,name,created_at")
+    .eq("role", "driver").eq("status", "pending").order("created_at", {ascending:true});
+  if (!r.error && r.data) requests = r.data;
+  return r.error;
+}
+async function loadPools(){
+  var a = await sb.from("rfid_cards").select("uid").order("uid");
+  var b = await sb.from("pin_pool").select("pin").order("pin");
+  if (!a.error && a.data) rfidCards = a.data;
+  if (!b.error && b.data) pinPool = b.data;
+  return a.error || b.error;
+}
+async function loadMyDriver(){
+  var r = await sb.from("drivers").select("pin,revoked_at").eq("user_id", profile.id).maybeSingle();
+  if (!r.error) myDriver = r.data;
+}
+function freeRfids(){
+  var used = drivers.map(function(d){ return d.rfid_uid; });
+  return rfidCards.map(function(c){ return c.uid; }).filter(function(u){ return used.indexOf(u) < 0; });
+}
+function freePins(){
+  var used = drivers.map(function(d){ return d.pin; });
+  return pinPool.map(function(p){ return p.pin; }).filter(function(p){ return used.indexOf(p) < 0; });
+}
+
+/* ---- Showing data ---- */
+function espInfo(){
+  if (state.lastSeen === undefined) return {s:"checking"};
+  if (state.lastSeen === null) return {s:"offline"};
+  if (espChangedAt) {
+    var secs = (Date.now() - espChangedAt) / 1000;
+    return secs <= ESP_OFFLINE_AFTER_S ? {s:"online", secs:Math.round(secs)} : {s:"offline"};
+  }
+  // First look at the page: wait for one fresh report before deciding (avoids relying on this device's clock).
+  var guess = (Date.now() - new Date(state.lastSeen).getTime()) / 1000;
+  if (guess > 120) return {s:"offline"};
+  return (Date.now() - espFirstLoadAt) / 1000 > ESP_OFFLINE_AFTER_S ? {s:"offline"} : {s:"checking"};
+}
+function gate(el, valEl, loopEl, status, known){
+  if (!known) {
+    el.className = "gate-card";
+    valEl.textContent = "Unknown";
+    if (loopEl) loopEl.textContent = "Awaiting ESP32";
+    return;
+  }
+  var open = status === "open";
+  el.className = "gate-card " + (open ? "warn" : "ok");
+  valEl.textContent = open ? "Open" : "Closed";
+  if (loopEl) loopEl.textContent = open ? "BARRIER OPEN" : "NORMAL";
+}
+function renderRecentFeed(){
+  var feed = $("recentFeed");
+  if (!feed) return;
+  if (!logRows.length) {
+    feed.innerHTML = '<p class="empty">No entries recorded yet.</p>';
+    $("recentCount").textContent = "0 entries recorded";
+    return;
+  }
+  var top = logRows.slice(0, 6);
+  var h = "";
+  top.forEach(function(l){
+    h += '<div class="feed-item"><div class="feed-left"><div class="feed-ico">' +
+         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>' +
+         '</div><div style="min-width:0"><div class="feed-name">' + esc(l.name || "Unknown") + '</div>' +
+         '<div class="feed-meta mono">ID ' + esc(l.driver_code || "-") + ' · RFID ' + esc(fmtUid(l.rfid_uid)) + ' · PIN ' + esc(l.pin || "-") + '</div>' +
+         '</div></div><div class="feed-right"><div class="feed-badge mono">APPROVED</div>' +
+         '<div class="feed-time mono">' + esc(fmtTime(l.created_at)) + '</div></div></div>';
+  });
+  feed.innerHTML = h;
+  $("recentCount").textContent = "Showing latest " + top.length + " of " + logRows.length + " entries";
+}
+function render(){
+  if (!profile) return;
+  if (profile.role === "admin") {
+    var info = espInfo(), esp = $("esp");
+    var cls = info.s === "online" ? "ok" : info.s === "offline" ? "bad" : "warn";
+    esp.className = "c " + cls;
+    $("espv").innerHTML = '<span class="dot"></span>' + (info.s === "online" ? "Online" : info.s === "offline" ? "Offline" : "Checking…");
+    $("esps").textContent = info.s === "online" ? "Last message " + info.secs + "s ago" : info.s === "offline" ? "No signal from the gateway" : "Waiting for signal…";
+    $("espBadge").textContent = info.s === "online" ? "ONLINE" : info.s === "offline" ? "OFFLINE" : "CHECKING";
+    $("navEspPill").className = "esp-pill mono " + cls;
+    $("navEspTxt").textContent = "ESP32 " + (info.s === "online" ? "ONLINE" : info.s === "offline" ? "OFFLINE" : "CHECKING");
+    $("navAdminEmail").textContent = profile.email || profile.name || "Admin";
+
+    $("gr").textContent = state.granted;
+    $("de").textContent = state.denied;
+    var totAuth = (Number(state.granted) || 0) + (Number(state.denied) || 0);
+    $("authRate").textContent = totAuth > 0 ? Math.round((Number(state.granted) / totAuth) * 100) + "%" : "100%";
+
+    gate($("en"), $("env"), $("enLoop"), state.entry, info.s === "online");
+    gate($("ex"), $("exv"), $("exLoop"), state.exit, info.s === "online");
+
+    var n = state.total, taken = state.taken, free = Math.max(n - taken, 0);
+    var pct = n > 0 ? Math.round((taken / n) * 100) : 0;
+    $("capVal").innerHTML = free + ' <span style="font-size:12px;font-weight:500;color:var(--ink-dim)">/ ' + n + ' Free</span>';
+    $("capStatus").textContent = n === 0 ? "No bays" : (free === 0 ? "FACILITY FULL" : free + " open");
+    $("capStatus").style.color = n > 0 && free > 0 ? "var(--ok)" : "var(--bad)";
+    $("bSpLabel").textContent = n > 0 ? "Bay Status (" + free + "/" + n + " Free)" : "Parking Spaces";
+    $("occCapBadge").textContent = "TOTAL: " + n;
+    $("occFreeTxt").textContent = free + " spots available";
+    $("occPctTxt").textContent = pct + "% Occupied";
+    $("occFill").style.width = pct + "%";
+    $("occRatio").textContent = "Occupied (" + taken + "/" + n + ")";
+
+    var mb = "";
+    state.spaces.forEach(function(s){
+      mb += '<div class="mini-bay ' + (s.taken ? 'taken' : 'free') + '"><span class="b-num">Bay #' + esc(s.id) + '</span><span class="b-st">' + (s.taken ? 'TAKEN' : 'FREE') + '</span></div>';
+    });
+    $("miniBays").innerHTML = mb || '<span style="font-size:11px;color:var(--ink-mute)">No bays configured</span>';
+
+    renderRecentFeed();
+    dots();
+  }
+  renderSlots();
+  showPin();
+}
+function renderSlots(){
+  var n = state.total, taken = state.taken, free = Math.max(n - taken, 0);
+  var pct = n > 0 ? Math.round((taken / n) * 100) : 0;
+  $("freec").className = "c freec " + (n > 0 && free > 0 ? "ok" : "bad");
+  $("freev").textContent = n === 0 ? "No spaces set up" : (free > 0 ? free + " of " + n + " available" : "Parking full");
+  $("userOccFill").style.width = pct + "%";
+  var bg = "";
+  state.spaces.forEach(function(s){
+    bg += '<div class="slot-card ' + (s.taken ? 'taken' : 'free') + '">' +
+          '<div class="slot-top"><span class="slot-id">Bay-' + esc(s.id) + '</span><span class="slot-dot"></span></div>' +
+          '<div class="slot-state">' + (s.taken ? 'OCCUPIED' : 'VACANT') + '</div>' +
+          '<div class="slot-meta">' + (s.taken ? 'IR Beam Obstructed' : 'Available for parking') + '</div>' +
+          '</div>';
+  });
+  $("userBayGrid").innerHTML = bg;
+}
+function showPin(){
+  var el = $("pin");
+  if (!profile || profile.role !== "driver") return;
+  el.textContent = myDriver ? (myDriver.revoked_at ? "PIN - revoked" : "PIN - " + myDriver.pin) : "PIN - pending";
+  $("driverPassName").textContent = profile.name || profile.email || "Authorized Driver";
+  $("navUserEmail").textContent = profile.email || profile.name || "Driver";
+}
+function dots(){
+  var count = requests.length;
+  $("rdot").hidden = !count;
+  $("bnavDot").hidden = !count;
+  var nb = $("navReqBadge");
+  if (nb) { nb.hidden = !count; nb.textContent = count; }
+}
+
+/* Decides which screen to show (the database security rules decide what data each account may read) */
+function applyRole(){
+  var role = profile ? profile.role : null, st = profile ? profile.status : null;
+  var u = role === "driver";
+  var sp = role === "admin" && viewSpaces;
+  var ok = u && st === "approved";
+  $("login").hidden = !!profile;
+  $("dash").hidden = role !== "admin" || viewSpaces;
+  $("user").hidden = !(sp || ok);
+  $("out2").textContent = sp ? "Back" : "Sign out";
+  $("driverPassCard").hidden = sp;
+  $("pin").hidden = sp;
+  if (sp && profile) {
+    $("navUserEmail").textContent = profile.email || "Admin";
+    $("navUserRole").textContent = "Admin";
+  } else if (profile) {
+    $("navUserRole").textContent = "Driver";
+  }
+  $("wait").hidden = !(u && st === "pending");
+  $("revoked").hidden = !(u && st === "revoked");
+  $("denied").hidden = !(u && st === "denied");
+  render();
+}
+$("wt2").textContent = "Contact the admin at - " + ADMIN_CONTACT;
+$("wt3").textContent = "Contact the admin at - " + ADMIN_CONTACT;
+$("wt4").textContent = "Contact admin at - " + ADMIN_CONTACT;
+
+/* ---- Admin lists (Entries, Edit access, New driver requests) ---- */
+function paint(){
+  var h = "", ml = $("ml");
+  if (view === "log") {
+    $("mt").textContent = "Entries";
+    if (!logRows.length) h = '<p class="empty">No entries yet.</p>';
+    logRows.forEach(function(l){
+      h += '<div class="r"><div><div class="n">' + esc(l.name || "Unknown") + '</div><div class="id">ID ' + esc(l.driver_code || "-") +
+           ' · RFID ' + esc(fmtUid(l.rfid_uid)) + ' · PIN ' + esc(l.pin || "-") + ' · ' + esc(fmtTime(l.created_at)) +
+           '</div></div><span class="tag in">Entered</span></div>';
+    });
+  } else if (view === "req") {
+    $("mt").textContent = "New driver requests";
+    reqKey = requests.map(function(q){ return q.id; }).join(",");
+    if (!requests.length) h = '<p class="empty">No pending requests.</p>';
+    var fr = freeRfids(), fp = freePins();
+    requests.forEach(function(q, i){
+      var po = '<option value="">Select PIN</option>' + fp.map(function(p){ return '<option value="' + esc(p) + '">' + esc(p) + '</option>'; }).join("");
+      var o = '<option value="">Select RFID</option>' + fr.map(function(u){ return '<option value="' + esc(u) + '">' + esc(fmtUid(u)) + '</option>'; }).join("");
+      h += '<div class="q"><div class="n">' + esc(q.name || "(no name)") + '</div><div class="id">' + esc(q.email) + ' · ' + esc(fmtTime(q.created_at)) +
+           '</div><div class="qf"><select id="rf' + i + '" aria-label="RFID card">' + o + '</select><select id="pn' + i + '" aria-label="PIN code">' + po +
+           '</select><button class="rs" data-a="ok" data-i="' + i + '">Approve</button><button class="rv" data-a="no" data-i="' + i +
+           '">Decline</button></div><div class="qe" id="qe' + i + '" role="alert"></div></div>';
+    });
+    if (requests.length && (!fr.length || !fp.length)) {
+      h += '<p class="empty">' + (!fr.length ? "No free RFID cards left. " : "") + (!fp.length ? "No free PINs left. " : "") + 'Add more in the database (rfid_cards / pin_pool).</p>';
+    }
+  } else {
+    $("mt").textContent = "Edit access";
+    if (!drivers.length) h = '<p class="empty">No drivers have access.</p>';
+    drivers.forEach(function(d, i){
+      var rev = !!d.revoked_at, b;
+      if (d.is_master) b = '<span class="tag out">Master</span>';
+      else if (rev) b = '<button class="rs" data-a="restore" data-i="' + i + '">Restore</button>';
+      else b = '<button class="rv' + (pend === i ? ' on' : '') + '" data-a="revoke" data-i="' + i + '">' + (pend === i ? "Tap again to confirm" : "Revoke") + '</button>';
+      h += '<div class="r"><div><div class="n">' + esc(d.name) + '</div><div class="id">ID ' + esc(d.driver_code) + ' · ' +
+           (rev ? "RFID and PIN revoked" : "RFID " + esc(fmtUid(d.rfid_uid)) + " · PIN " + esc(d.pin)) + '</div></div>' + b + '</div>';
+    });
+  }
+  ml.innerHTML = h;
+}
+function msg(t){ $("mm").textContent = t || ""; }
+function friendlyErr(m){
+  if (/duplicate key|unique/i.test(m)) return "That RFID card or PIN is already in use. Pick another.";
+  return m;
+}
+async function openList(k){
+  view = k; pend = null; clearTimeout(pt); msg("");
+  $("mt").textContent = k === "log" ? "Entries" : k === "req" ? "New driver requests" : "Edit access";
+  $("ml").innerHTML = '<p class="empty">Loading…</p>';
+  $("modal").hidden = false;
+  var err = null;
+  if (k === "log") err = await loadEntries();
+  else if (k === "access") { await sb.rpc("purge_revoked"); err = await loadDrivers(); }
+  else { err = (await loadRequests()) || (await loadDrivers()) || (await loadPools()); dots(); }
+  if (err) { $("ml").innerHTML = ""; msg("Could not load: " + err.message); return; }
+  paint();
+}
+function closeList(){ $("modal").hidden = true; pend = null; msg(""); }
+function repaintIfSafe(){
+  if ($("modal").hidden) return;
+  if (view === "log") paint();
+  else if (view === "access" && pend === null) paint();
+  else if (view === "req") {
+    var key = requests.map(function(q){ return q.id; }).join(",");
+    if (key !== reqKey) {
+      var busy = false;
+      $("ml").querySelectorAll("select").forEach(function(s){ if (s.value) busy = true; });
+      if (!busy) paint();
+    }
+  }
+}
+async function revokeDriver(d){
+  pend = null; msg("");
+  var r = await sb.rpc("revoke_driver", {p_user: d.user_id});
+  if (r.error) { msg(r.error.message); return; }
+  await loadDrivers(); paint();
+  // After 10 seconds the driver is removed and their ID, RFID card and PIN become free again.
+  setTimeout(async function(){
+    await sb.rpc("purge_revoked");
+    await loadDrivers(); await loadPools();
+    if (!$("modal").hidden && view === "access" && pend === null) paint();
+  }, 10200);
+}
+async function restoreDriver(d){
+  msg("");
+  var r = await sb.rpc("restore_driver", {p_user: d.user_id});
+  if (r.error) { msg(r.error.message); return; }
+  if (r.data === false) msg("Too late to restore. The driver has been removed.");
+  await loadDrivers(); paint();
+}
+async function reqAction(b){
+  var i = +b.getAttribute("data-i"), q = requests[i], a = b.getAttribute("data-a"), er = $("qe" + i);
+  if (!q) return;
+  er.textContent = "";
+  if (a === "no") {
+    b.disabled = true;
+    var r1 = await sb.rpc("decline_driver", {p_user: q.id});
+    if (r1.error) { er.textContent = r1.error.message; b.disabled = false; return; }
+    await loadRequests(); paint(); dots();
+    return;
+  }
+  var u = $("rf" + i).value, p = $("pn" + i).value;
+  if (!u) { er.textContent = "Choose an RFID card first."; return; }
+  if (!p) { er.textContent = "Choose a PIN first."; return; }
+  b.disabled = true;
+  var r2 = await sb.rpc("approve_driver", {p_user: q.id, p_rfid: u, p_pin: p});
+  if (r2.error) { er.textContent = friendlyErr(r2.error.message); b.disabled = false; return; }
+  await loadRequests(); await loadDrivers(); await loadPools();
+  paint(); dots();
+}
+$("ml").addEventListener("click", function(ev){
+  var b = ev.target.closest("button"); if (!b) return;
+  if (view === "req") { reqAction(b); return; }
+  if (view !== "access") return;
+  var i = +b.getAttribute("data-i"), d = drivers[i], a = b.getAttribute("data-a");
+  if (!d) return;
+  if (a === "restore") restoreDriver(d);
+  else if (a === "revoke") {
+    if (pend === i) revokeDriver(d);
+    else { pend = i; clearTimeout(pt); pt = setTimeout(function(){ pend = null; paint(); }, 4000); paint(); }
+  }
+});
+$("bEnt").addEventListener("click", function(){ openList("log"); });
+$("bEdit").addEventListener("click", function(){ openList("access"); });
+$("bReq").addEventListener("click", function(){ openList("req"); });
+$("bSp").addEventListener("click", async function(){ closeList(); viewSpaces = true; await loadSpaces(); applyRole(); });
+$("mx").addEventListener("click", closeList);
+$("modal").addEventListener("click", function(ev){ if (ev.target === this) closeList(); });
+document.addEventListener("keydown", function(ev){ if (ev.key === "Escape") closeList(); });
+
+/* ---- Live updates ---- */
+function startRealtime(){
+  stopRealtime();
+  if (!sb || !profile) return;
+  var ch = sb.channel("pk-live");
+  function on(table, fn, filter){
+    var o = {event:"*", schema:"public", table:table};
+    if (filter) o.filter = filter;
+    ch.on("postgres_changes", o, fn);
+  }
+  if (profile.role === "admin") {
+    on("gateway_status", async function(){ await loadStatus(); render(); });
+    on("parking_spaces", async function(){ await loadSpaces(); render(); });
+    on("event_log", async function(){ await loadEntries(); renderRecentFeed(); if (!$("modal").hidden && view === "log") paint(); });
+    on("profiles", async function(){ await loadRequests(); dots(); repaintIfSafe(); });
+    on("drivers", async function(){ await loadDrivers(); repaintIfSafe(); });
+  } else {
+    on("parking_spaces", async function(){ await loadSpaces(); render(); });
+    on("profiles", function(){ refreshProfile(); }, "id=eq." + profile.id);
+    on("drivers", async function(){ await loadMyDriver(); render(); }, "user_id=eq." + profile.id);
+  }
+  ch.subscribe();
+  channel = ch;
+}
+function stopRealtime(){
+  if (channel && sb) { try { sb.removeChannel(channel); } catch (x) {} }
+  channel = null;
+}
+async function refreshProfile(){
+  if (!profile) return;
+  var r = await sb.from("profiles").select("*").eq("id", profile.id).maybeSingle();
+  if (r.error || !r.data) return;
+  var changed = r.data.status !== profile.status || r.data.role !== profile.role;
+  profile = r.data;
+  if (changed) {
+    if (profile.role === "driver" && profile.status === "approved") { await loadMyDriver(); await loadSpaces(); }
+    applyRole();
+  }
+}
+async function tick(){
+  if (!profile) return;
+  try {
+    await refreshProfile();
+    if (!profile) return;
+    if (profile.role === "admin") {
+      await Promise.all([loadStatus(), loadRequests(), loadSpaces(), loadEntries()]);
+      render(); repaintIfSafe();
+    } else if (profile.status === "approved") {
+      await Promise.all([loadSpaces(), loadMyDriver()]);
+      render();
+    }
+  } catch (x) {}
+}
+function startTimers(){
+  stopTimers();
+  pollTimer = setInterval(tick, POLL_MS);
+  clockTimer = setInterval(render, 1000);   // keeps "Last message Ns ago" moving
+}
+function stopTimers(){
+  clearInterval(pollTimer); clearInterval(clockTimer);
+  pollTimer = null; clockTimer = null;
+}
+
+/* ---- Sign in / sign up / sign out ---- */
+var signup = false;
+function setMode(s){
+  signup = s;
+  $("go").textContent = s ? "Create account" : "Sign in";
+  $("sw").textContent = s ? "Have an account? Sign in" : "New driver? Create account";
+  $("sub").textContent = s ? "Create a driver account. The admin will then set up your gate access." : "Sign in to continue.";
+  $("nmw").hidden = !s;
+  $("err").textContent = "";
+  $("tabIn").classList.toggle("active", !s);
+  $("tabUp").classList.toggle("active", s);
+}
+$("sw").addEventListener("click", function(){ setMode(!signup); });
+$("pwEye").addEventListener("click", function(){
+  var p = $("pw");
+  p.type = p.type === "password" ? "text" : "password";
+});
+
+async function enter(user){
+  var r = await sb.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  if (r.error || !r.data) {
+    await sb.auth.signOut();
+    $("err").textContent = "Could not load your account. Ask the admin to check the database setup.";
+    return;
+  }
+  profile = r.data;
+  if (profile.role === "device") {
+    await sb.auth.signOut(); profile = null;
+    $("err").textContent = "This account belongs to the gateway and cannot use the webpage.";
+    return;
+  }
+  viewSpaces = false; myDriver = null; espSeen = undefined; espChangedAt = 0;
+  state.lastSeen = undefined;
+  if (profile.role === "admin") {
+    try { await sb.rpc("purge_revoked"); } catch (x) {}
+    await Promise.all([loadStatus(), loadRequests(), loadDrivers(), loadPools(), loadSpaces(), loadEntries()]);
+  } else {
+    await Promise.all([loadSpaces(), loadMyDriver()]);
+  }
+  setMode(false);
+  $("pw").value = "";
+  startRealtime();
+  startTimers();
+  applyRole();
+}
+function leave(){
+  stopRealtime(); stopTimers(); closeList();
+  profile = null; myDriver = null; viewSpaces = false;
+  state = {total:0, taken:0, lastSeen:undefined, granted:0, denied:0, entry:"closed", exit:"closed", spaces:[]};
+  espSeen = undefined; espChangedAt = 0;
+  drivers = []; requests = []; logRows = []; rfidCards = []; pinPool = [];
+  $("pw").value = "";
+  setMode(false);
+  applyRole();
+}
+async function signOut(){
+  try { if (sb) await sb.auth.signOut(); } catch (x) {}
+  leave();
+}
+$("out").addEventListener("click", signOut);
+$("out3").addEventListener("click", signOut);
+$("out4").addEventListener("click", signOut);
+$("out5").addEventListener("click", signOut);
+$("out2").addEventListener("click", function(){
+  if (profile && profile.role === "admin") { viewSpaces = false; applyRole(); } else signOut();
+});
+
+$("f").addEventListener("submit", async function(ev){
+  ev.preventDefault();
+  var err = $("err"); err.textContent = "";
+  if (!sb) {
+    err.textContent = configured
+      ? "Could not load the Supabase library. Check your internet connection and reload."
+      : "First set SUPABASE_URL and SUPABASE_KEY at the top of the script in index.html.";
+    return;
+  }
+  var email = $("em").value.trim().toLowerCase(), pw = $("pw").value, btn = $("go");
+  btn.disabled = true;
+  try {
+    if (signup) {
+      var nm = $("nm").value.trim();
+      if (!nm) { err.textContent = "Enter your full name."; return; }
+      if (pw.length < 6) { err.textContent = "Use a password with at least 6 characters."; return; }
+      await sb.rpc("claim_email", {p_email: email});   // frees an email that belonged to a denied or revoked driver
+      var r = await sb.auth.signUp({email: email, password: pw, options: {data: {name: nm}}});
+      if (r.error) {
+        err.textContent = /already/i.test(r.error.message) ? "That email already has an account. Sign in instead." : r.error.message;
+        return;
+      }
+      if (!r.data.session) {
+        setMode(false);
+        err.textContent = "Account created. Check your email to confirm it, then sign in.";
+        return;
+      }
+      await enter(r.data.user);
+    } else {
+      var r2 = await sb.auth.signInWithPassword({email: email, password: pw});
+      if (r2.error) {
+        err.textContent = /confirm/i.test(r2.error.message) ? "Confirm your email first (check your inbox), then sign in."
+          : /invalid/i.test(r2.error.message) ? "Email or password is incorrect. Check both and try again."
+          : r2.error.message;
+        return;
+      }
+      await enter(r2.data.user);
+    }
+  } catch (x) {
+    err.textContent = "Something went wrong: " + (x && x.message ? x.message : x);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ---- Start: restore a saved sign-in, or show the sign-in form ---- */
+if (sb) {
+  sb.auth.onAuthStateChange(function(event){ if (event === "SIGNED_OUT" && profile) leave(); });
+  sb.auth.getSession().then(function(r){
+    if (r.data && r.data.session) enter(r.data.session.user);
+  });
+}
+applyRole();
+</script>
+</body>
+</html>
